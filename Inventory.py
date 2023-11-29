@@ -1,134 +1,53 @@
 import sqlite3
-import sys
-#everything above can be deleted later
 
+# Inventory Class
 class Inventory:
     def __init__(self, databaseName='', tableName=''):
         self.databaseName = databaseName
         self.tableName = tableName
-        #self.inventoryContents = '???'
 
-    #prints inventory
+    def connect_to_db(self):
+        # Replace this with your actual database connection logic
+        return sqlite3.connect(self.databaseName)
+
     def viewInventory(self):
-        try:
-            connection = sqlite3.connect(self.databaseName + ".sql")
+        # Displays all items in the inventory in some formatted way
+        conn = self.connect_to_db()
+        cursor = conn.execute(f"SELECT * FROM {self.tableName}")
+        
+        # Replace this with actual formatting logic based on your table structure
+        for row in cursor.fetchall():
+            print(row)
 
-            print("Successful connection.")
+        conn.close()
 
-        except:
-            print("Failed connection.")
-
-            ## exits the program if unsuccessful
-            sys.exit()
-
-        print() ## spacing's sake
-
-        ## cursor to send queries through
-        cursor = connection.cursor()
-
-        ## sends query and grabs data
-        ## SELECT queries return a tuple for each row contained in a list
-        ## --> a list of tuples
-        cursor.execute("SELECT * FROM "+ self.tableName)
-
-        ## only needed if you're running a SELECT
-        ## this actually grabs the data
-        result = cursor.fetchall()
-
-        ## illustrates what unformatted results look like
-        #print("Entire result set: ", result, sep="\n", end="\n\n\n")
-
-        for x in result:
-            ## you can print the entire tuple --> print(x)
-            ## or you can print items from it using indices
-            ## first item --> x[0]
-            ## second item --> x[1]
-            ## etc... (for however many columns a result has)
-
-            print("Entire row:", x, "\n") ## all
-
-            print("Row broken down into each column: ")
-            for y in x:
-                print(y)
-            print()
-
-            print("ISBN:", x[0]) ## only the ISBN
-            print("Title:", x[1], "\tAuthor:", x[2])
-            print("\n\n")
-            cursor.close()
-            connection.close()
-
-    #finds and prints specific item
     def searchInventory(self):
-        try:
-            connection = sqlite3.connect(self.databaseName + ".sql")
+        # Asks for a *title*, checks the database to see if a result is returned on that name.
+        # If so, display all results. If not, the user is informed their search failed
+        title = input("Enter the title to search: ")
 
-            print("Successful connection.")
+        conn = self.connect_to_db()
+        query = f"SELECT * FROM {self.tableName} WHERE Title LIKE ?"
+        cursor = conn.execute(query, ('%' + title + '%',))
 
-        except:
-            print("Failed connection.")
+        # Replace this with actual formatting logic based on your table structure
+        for row in cursor.fetchall():
+            print(row)
 
-            ## exits the program if unsuccessful
-            sys.exit()
-        cursor = connection.cursor()
-        selection = input("Title:  ")
-        print("Specific column select: ")
+        conn.close()
 
-        cursor.execute("SELECT "+ selection +" FROM "+ self.tableName)
-        result = cursor.fetchall()
+    def decreaseStock(self, ISBN, quantity=1):
+        # Called with a single ISBN parameter and decreases the stock number in the appropriate database for the appropriate ISBN
+        conn = self.connect_to_db()
 
-        ## because of the SELECT query
-        ## 0 --> Title
-        ## 1 --> Author
-        ## if not selecting ALL columns, numbering is based on query order
-        for x in result:
-            print(x[0], "by", x[1])
+        # Replace this with actual database update logic based on your table structure
+        query = f"UPDATE {self.tableName} SET Stock = Stock - ? WHERE ISBN = ?"
+        conn.execute(query, (quantity, ISBN))
+        conn.commit()
 
-        ## selecting a specific column of a specific row
-        ## goal: shows how it'd work even if you're only selecting one specific item
-        ## even though you're only grabbing on item, it's still in a list of tuples
-        print("\n\n\nSpecific column/row select:")
-        '''
-        cursor.execute("SELECT Title FROM "+ self.tableName +" WHERE ISBN='978-0307265432'")
-        result = cursor.fetchall()
+        print(f"Decreased stock for ISBN {ISBN}")
 
-        print("Unformatted result:", result)
+        conn.close()
 
-        title = result[0][0] ## grabs the single item
-        print("Title you grabbed:", title)
-        '''
-        cursor.close()
-        connection.close()
-
-    #decreases inventory at a certain point
-    def decrementInventory(self, ISBN):
-         try:
-            connection = sqlite3.connect(self.databaseName + ".sql")
-
-            print("Successful connection.")
-         except:
-             print("Failed connection.")
-
-             ## exits the program if unsuccessful
-             sys.exit()
-         cursor = connection.cursor()
-         if ISBN not in self.inventoryContents:
-            print("ISBN not found in inventory")
-         else:
-            print("ISBN found")
-            cursor.execute("SELECT Stock FROM "+ self.tableName +" WHERE ISBN='" + str(ISBN) + "'")
-            result = cursor.fetchall()
-            result = int(result)
-            print("Original stock: " + str(result))
-            if result <= 1:
-                #remove ISBN row from table
-                cursor.execute("DELETE FROM "+ self.tableName +" WHERE ISBN='" + str(ISBN) + "'")
-            else:
-                #decrement value and return to table
-            
-                cursor.execute("UPDATE "+ self.tableName +" SET Stock='"+ str(result - 1) +"' WHERE ISBN='"+ str(ISBN) +"'")
-                print("Decremented stock: " + str(result))
-            cursor.close()
-            connection.close()
-
-
+# Main File
+# (The rest of the code remains the same)

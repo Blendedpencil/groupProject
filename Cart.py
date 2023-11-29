@@ -2,7 +2,7 @@ import sqlite3
 
 # Cart Class
 class Cart:
-    def __init__(self, inventory, databaseName='', tableName=''):
+    def __init__(self, inventory, databaseName='', tableName='Cart'):
         self.inventory = inventory
         self.databaseName = databaseName
         self.tableName = tableName

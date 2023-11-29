@@ -1,4 +1,7 @@
 import sqlite3
+from User import User
+from Inventory import Inventory
+from Cart import Cart
 
 # User Class
 class User:
